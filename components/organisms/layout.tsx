@@ -9,6 +9,7 @@ import { media } from "@/utils/media";
 import Menu from "@/organisms/menu";
 
 import { useRouter } from "next/router";
+import Sidebar from "./sidebar";
 
 const GlobalStyle = createGlobalStyle`
 
@@ -131,11 +132,23 @@ const Layout: FC<ILayout> = ({
       }}
     >
       <GlobalStyle />
-      <Menu/>
-      {children && <main>{children}</main>}
+      <Menu />
+      {children && (
+        <Main>
+          <Sidebar />
+          <div className="childrenContent">{children}</div>
+        </Main>
+      )}
     </ThemeProvider>
   );
 };
 
 export default Layout;
 
+const Main = styled.main`
+  display: flex;
+  .childrenContent {
+    width: 80%;
+    flex: 0 0 80%;
+  }
+`;
