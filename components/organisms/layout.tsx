@@ -6,6 +6,8 @@ import styled, {
 } from "styled-components";
 import theme from "@/utils/theme";
 import { media } from "@/utils/media";
+import Menu from "@/organisms/menu";
+
 import { useRouter } from "next/router";
 
 const GlobalStyle = createGlobalStyle`
@@ -129,6 +131,7 @@ const Layout: FC<ILayout> = ({
       }}
     >
       <GlobalStyle />
+      <Menu/>
       {children && <main>{children}</main>}
     </ThemeProvider>
   );
