@@ -1,12 +1,12 @@
+import Layout from "@/organisms/layout";
 import type { NextPage } from "next";
 import Head from "next/head";
 
-const Home: NextPage = ({ data }) => {
-  console.log(data);
+const Home: NextPage = () => {
   return (
-    <div>
-      
-    </div>
+    <Layout translations={""}>
+      1
+    </Layout>
   );
 };
 
