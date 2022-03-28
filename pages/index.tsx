@@ -1,12 +1,14 @@
+import Seo from "@/molecules/seo";
 import Layout from "@/organisms/layout";
 import type { NextPage } from "next";
 import Head from "next/head";
 
 const Home: NextPage = () => {
   return (
-    <Layout translations={""}>
-      1
-    </Layout>
+    <>
+      <Seo title="Home"></Seo>
+      <Layout translations={""}>1</Layout>
+    </>
   );
 };
 
