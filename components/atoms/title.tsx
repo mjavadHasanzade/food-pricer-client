@@ -30,7 +30,7 @@ interface ITitleST {
 }
 
 const TitleST = styled.h3<ITitleST>`
-  padding: .75rem 0;
+  padding: .5rem 0;
   padding-top: 0;
   font-size: ${(props) =>
     props.important === "thired"

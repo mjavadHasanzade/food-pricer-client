@@ -30,6 +30,10 @@ const Table: FC<Props> = ({
     head = objectExtracter(body.length > 1 ? body[0] : {}, minus);
   }
 
+  if (!head) {
+    head = objectExtracter(body[0], []);
+  }
+
   return (
     <div>
       {title && (
@@ -98,11 +102,14 @@ const TableItem = styled.span<ITableRows>`
   border-bottom: 1px solid ${theme.colors.primary}40;
 
   span {
-    padding: 0.75rem 0;
+    padding: 0.6rem 0;
     flex: 0 0 calc(95% / ${(props) => (props.cols ? props.cols : 1)});
     text-align: center;
     text-overflow: ellipsis;
     overflow: hidden;
+    white-space: nowrap;
+    font-size: 0.9rem;
+
     &:first-child {
       flex: 0 0 5%;
       border-bottom: 0;

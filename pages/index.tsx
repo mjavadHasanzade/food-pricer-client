@@ -49,7 +49,7 @@ const Home: NextPage = ({ foods, ingredients }) => {
 
         <Tables className="row">
           <div className="col-12">
-            <Title className="mt-4" hasBorder={false} important="secondary">
+            <Title className="mt-3" hasBorder={false} important="secondary">
               Details
             </Title>
           </div>
@@ -94,7 +94,7 @@ export default Home;
 const DetailsContainer = styled.div`
   display: flex;
   justify-content: space-around;
-  padding: 1rem 0;
+  padding: .75rem 0;
   border-bottom: 1px solid ${theme.colors.primary};
 `;
 
