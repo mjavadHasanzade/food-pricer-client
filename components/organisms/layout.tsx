@@ -148,6 +148,7 @@ export default Layout;
 const Main = styled.main`
   display: flex;
   .childrenContent {
+    padding: 2rem;
     width: 80%;
     flex: 0 0 80%;
   }
