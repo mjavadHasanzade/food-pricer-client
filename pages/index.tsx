@@ -102,12 +102,12 @@ const Tables = styled.div``;
 
 export async function getServerSideProps(context) {
   const foodRes = await fetch(
-    process.env.API_URL + "foods" || "http://localhost:5000"
+    process.env.NEXT_PUBLIC_API_URL + "foods" || "http://localhost:5000"
   );
   const foods = await foodRes.json();
 
   const ingredientRes = await fetch(
-    process.env.API_URL + "ingredients" || "http://localhost:5000"
+    process.env.NEXT_PUBLIC_API_URL + "ingredients" || "http://localhost:5000"
   );
   const ingredients = await ingredientRes.json();
 
