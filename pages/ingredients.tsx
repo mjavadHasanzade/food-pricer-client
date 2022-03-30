@@ -7,8 +7,11 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 
-const Ingredients: NextPage = ({ ingredients }) => {
+interface IIngredients {
+  ingredients: IRowsCount<IIngredient>;
+}
 
+const Ingredients: NextPage<IIngredients> = ({ ingredients }) => {
   return (
     <>
       <Seo title="Ingredients"></Seo>
@@ -33,7 +36,7 @@ const Ingredients: NextPage = ({ ingredients }) => {
 
 export default Ingredients;
 
-export async function getServerSideProps(context) {
+export async function getServerSideProps() {
   const ingredientRes = await fetch(
     process.env.NEXT_PUBLIC_API_URL + "ingredients" || "http://localhost:5000"
   );

@@ -5,17 +5,14 @@ import React, { FC } from "react";
 import styled from "styled-components";
 
 type Props = {
-  head?: any;
-  minus?: any;
+  head?: Array<string>;
+  minus?: Array<string>;
   body: any;
   height?: string;
   title?: string;
 };
 
 interface ITableRows {
-  children:
-    | React.ReactElement<HTMLSpanElement>
-    | Array<React.ReactElement<HTMLSpanElement>>;
   cols: number;
 }
 
@@ -24,14 +21,12 @@ const Table: FC<Props> = ({
   head,
   height = "auto",
   title,
-  minus = [],
+  minus = [""],
 }) => {
   if (minus.length >= 1) {
     head = objectExtracter(body.length > 1 ? body[0] : {}, minus);
-  }
-
-  if (!head) {
-    head = objectExtracter(body[0], []);
+  } else {
+    head = objectExtracter(body[0], [""]);
   }
 
   return (
@@ -44,23 +39,25 @@ const Table: FC<Props> = ({
       <TableContainerST height={height}>
         <TableHead cols={head.length}>
           <span>#</span>
-          {head.map((headItem, index: number) => (
-            <>
+          {head.length > 0 &&
+            head.map((headItem, index: number) => (
               <span key={index}>{headItem}</span>
-            </>
-          ))}
+            ))}
         </TableHead>
 
         {body.length <= 0 && <NetFoundText>No Items Found</NetFoundText>}
 
-        {body.map((item, index: number) => (
-          <TableItem key={index} cols={head.length}>
+        {body.map((item: any, index: number) => (
+          <TableItem
+            key={index}
+            cols={head && head.length > 0 ? head.length : 1}
+          >
             <span>{index + 1}</span>
-            {head.map((headItem, i) => (
-              <>
+            {head &&
+              head.length > 0 &&
+              head.map((headItem: any, i) => (
                 <span key={i}>{item[headItem]}</span>
-              </>
-            ))}
+              ))}
           </TableItem>
         ))}
       </TableContainerST>

@@ -10,7 +10,12 @@ import { AiFillStar } from "react-icons/ai";
 import theme from "@/utils/theme";
 import Table from "@/molecules/table";
 
-const Home: NextPage = ({ foods, ingredients }) => {
+interface IHome {
+  foods: IRowsCount<IFood>;
+  ingredients: IRowsCount<IIngredient>;
+}
+
+const Home: NextPage<IHome> = ({ foods, ingredients }) => {
   return (
     <>
       <Seo title="Home"></Seo>
@@ -94,13 +99,13 @@ export default Home;
 const DetailsContainer = styled.div`
   display: flex;
   justify-content: space-around;
-  padding: .75rem 0;
+  padding: 0.75rem 0;
   border-bottom: 1px solid ${theme.colors.primary};
 `;
 
 const Tables = styled.div``;
 
-export async function getServerSideProps(context) {
+export async function getServerSideProps() {
   const foodRes = await fetch(
     process.env.NEXT_PUBLIC_API_URL + "foods" || "http://localhost:5000"
   );

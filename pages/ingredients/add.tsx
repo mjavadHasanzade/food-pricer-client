@@ -80,7 +80,7 @@ const AddNew: NextPage = () => {
 
 export default AddNew;
 
-export async function getServerSideProps(context) {
+export async function getServerSideProps() {
   const ingredientRes = await fetch(
     process.env.NEXT_PUBLIC_API_URL + "ingredients" || "http://localhost:5000"
   );
