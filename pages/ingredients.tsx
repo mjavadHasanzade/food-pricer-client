@@ -4,7 +4,6 @@ import Seo from "@/molecules/seo";
 import Table from "@/molecules/table";
 import Layout from "@/organisms/layout";
 import type { NextPage } from "next";
-import Head from "next/head";
 import Link from "next/link";
 
 interface IIngredients {
@@ -28,6 +27,8 @@ const Ingredients: NextPage<IIngredients> = ({ ingredients }) => {
           body={ingredients.rows}
           height="70vh"
           minus={["id", "isComplete", "Foods"]}
+          actions={true}
+          tablePath="ingredients/"
         />
       </Layout>
     </>
