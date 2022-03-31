@@ -1,8 +1,12 @@
 import Title from "@/atoms/title";
 import objectExtracter from "@/utils/objectExtracter";
 import theme from "@/utils/theme";
-import React, { FC } from "react";
+import React, { FC, useState } from "react";
 import styled from "styled-components";
+import { BiPencil } from "react-icons/bi";
+import { FiTrash2 } from "react-icons/fi";
+import { getAxiosInstanse } from "api/api";
+import Link from "next/link";
 
 type Props = {
   head?: Array<string>;
@@ -10,10 +14,13 @@ type Props = {
   body: any;
   height?: string;
   title?: string;
+  tablePath: string;
+  actions?: boolean;
 };
 
 interface ITableRows {
   cols: number;
+  actions: boolean;
 }
 
 const Table: FC<Props> = ({
@@ -22,12 +29,30 @@ const Table: FC<Props> = ({
   height = "auto",
   title,
   minus = [""],
+  actions = false,
+  tablePath,
 }) => {
+  const [tableBody, setTableBody] = useState(body);
+
   if (minus.length >= 1) {
-    head = objectExtracter(body.length > 1 ? body[0] : {}, minus);
+    head = objectExtracter(tableBody.length > 1 ? tableBody[0] : {}, minus);
   } else {
-    head = objectExtracter(body[0], [""]);
+    head = objectExtracter(tableBody[0], [""]);
   }
+
+  let cols = head.length;
+
+  const deleteItem = (path: string, id: number | string) => {
+    getAxiosInstanse()
+      .delete(path + id)
+      .then((res) => {
+        console.log(res);
+        getAxiosInstanse()
+          .get(path)
+          .then((res2) => setTableBody(res2.data.rows));
+      })
+      .catch((err) => console.log(err));
+  };
 
   return (
     <div>
@@ -37,7 +62,7 @@ const Table: FC<Props> = ({
         </Title>
       )}
       <TableContainerST height={height}>
-        <TableHead cols={head.length}>
+        <TableHead actions={actions} cols={cols}>
           <span>#</span>
           {head.length > 0 &&
             head.map((headItem, index: number) => (
@@ -45,19 +70,35 @@ const Table: FC<Props> = ({
             ))}
         </TableHead>
 
-        {body.length <= 0 && <NetFoundText>No Items Found</NetFoundText>}
+        {tableBody.length <= 0 && <NetFoundText>No Items Found</NetFoundText>}
 
-        {body.map((item: any, index: number) => (
-          <TableItem
-            key={index}
-            cols={head && head.length > 0 ? head.length : 1}
-          >
+        {tableBody.map((item: any, index: number) => (
+          <TableItem actions={actions} key={index} cols={cols}>
             <span>{index + 1}</span>
             {head &&
               head.length > 0 &&
               head.map((headItem: any, i) => (
                 <span key={i}>{item[headItem]}</span>
               ))}
+            {actions && (
+              <>
+                <span className="actions">
+                  <Link href={tablePath + item.id} passHref>
+                    <button className="edit">
+                      <BiPencil />
+                    </button>
+                  </Link>
+                </span>
+                <span className="actions">
+                  <button
+                    className="delete"
+                    onClick={() => deleteItem(tablePath, item.id)}
+                  >
+                    <FiTrash2 />
+                  </button>
+                </span>
+              </>
+            )}
           </TableItem>
         ))}
       </TableContainerST>
@@ -100,19 +141,49 @@ const TableItem = styled.span<ITableRows>`
 
   span {
     padding: 0.6rem 0;
-    flex: 0 0 calc(95% / ${(props) => (props.cols ? props.cols : 1)});
+    flex: 0 0
+      calc(
+        ${(props) => (props.actions ? "85%" : "95%")} /
+          ${(props) => (props.cols ? props.cols : 1)}
+      );
     text-align: center;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
     font-size: 0.9rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
     &:first-child {
       flex: 0 0 5%;
       border-bottom: 0;
     }
+
+    &.actions {
+      flex: 0 0 5%;
+
+      button {
+        border: none;
+        padding: 0.5rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 10px;
+        color: #fff;
+
+        &.edit {
+          background-color: #33b9f3;
+        }
+
+        &.delete {
+          background-color: #fa5c34;
+        }
+      }
+    }
   }
 `;
+
 const TableHead = styled(TableItem)`
   position: sticky;
   top: 0;
