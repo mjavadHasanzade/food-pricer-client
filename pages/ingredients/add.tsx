@@ -1,4 +1,5 @@
 import Button from "@/atoms/button";
+import Check from "@/atoms/check";
 import Input from "@/atoms/input";
 import Title from "@/atoms/title";
 import Seo from "@/molecules/seo";
@@ -6,7 +7,8 @@ import Layout from "@/organisms/layout";
 import { getAxiosInstanse } from "api/api";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import React, { useState } from "react";
+import styled from "styled-components";
 
 const AddNew: NextPage = () => {
   const [name, setName] = useState("");
@@ -15,7 +17,8 @@ const AddNew: NextPage = () => {
   const [isComplete, setIsComplete] = useState(false);
   const router = useRouter();
 
-  const handleForm = async () => {
+  const handleForm = async (e: React.FormEvent) => {
+    e.preventDefault();
     const ingredient = {
       name: name,
       quantity: quantity,
@@ -34,9 +37,9 @@ const AddNew: NextPage = () => {
       <Seo title="Ingredients"></Seo>
       <Layout translations={""}>
         <Title>Add New Ingredient</Title>
-        <div className="container">
+        <FormIng className="container">
           <div className="row">
-            <div className="col-md-6">
+            <div className="col-md-12">
               <Input
                 name="name"
                 placeHolder="Name"
@@ -44,7 +47,7 @@ const AddNew: NextPage = () => {
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
-            <div className="col-md-6">
+            <div className="col-md-12">
               <Input
                 name="quantity"
                 placeHolder="Quantity"
@@ -52,7 +55,7 @@ const AddNew: NextPage = () => {
                 onChange={(e) => setQuantity(e.target.value)}
               />
             </div>
-            <div className="col-md-6">
+            <div className="col-md-12">
               <Input
                 name="price"
                 placeHolder="Price"
@@ -60,19 +63,20 @@ const AddNew: NextPage = () => {
                 onChange={(e) => setPrice(e.target.value)}
               />
             </div>
-            <div className="col-md-6">
-              <Input
+            <div className="col-md-12 text-center">
+              <Check
+                className="my-2"
+                label="Is Ingredient Complete"
                 name="isComplete"
-                placeHolder="isComplete"
-                value={String(isComplete)}
-                onChange={(e) => setIsComplete(Boolean(e.target.value))}
+                checked={isComplete}
+                onChange={() => setIsComplete(!isComplete)}
               />
             </div>
-            <div className="col-12">
-              <Button onClick={() => handleForm()}>Save</Button>
+            <div className="col-12 text-center">
+              <Button onClick={(e) => handleForm(e)}>Save</Button>
             </div>
           </div>
-        </div>
+        </FormIng>
       </Layout>
     </>
   );
@@ -80,13 +84,6 @@ const AddNew: NextPage = () => {
 
 export default AddNew;
 
-export async function getServerSideProps() {
-  const ingredientRes = await fetch(
-    process.env.NEXT_PUBLIC_API_URL + "ingredients" || "http://localhost:5000"
-  );
-  const ingredients = await ingredientRes.json();
-
-  return {
-    props: { ingredients }, // will be passed to the page component as props
-  };
-}
+const FormIng = styled.form`
+  max-width: 50%;
+`;
