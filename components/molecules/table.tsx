@@ -7,6 +7,7 @@ import { BiPencil } from "react-icons/bi";
 import { FiTrash2 } from "react-icons/fi";
 import { getAxiosInstanse } from "api/api";
 import Link from "next/link";
+import { useToasts } from "react-toast-notifications";
 
 type Props = {
   head?: Array<string>;
@@ -33,6 +34,7 @@ const Table: FC<Props> = ({
   tablePath,
 }) => {
   const [tableBody, setTableBody] = useState(body);
+  const { addToast } = useToasts();
 
   if (minus.length >= 1) {
     head = objectExtracter(tableBody.length > 1 ? tableBody[0] : {}, minus);
@@ -46,12 +48,19 @@ const Table: FC<Props> = ({
     getAxiosInstanse()
       .delete(path + id)
       .then((res) => {
-        console.log(res);
+        addToast(res.data.message, { appearance: "success" });
         getAxiosInstanse()
           .get(path)
           .then((res2) => setTableBody(res2.data.rows));
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.log(err);
+        try {
+          addToast(err.data.message, { appearance: "error" });
+        } catch (error) {
+          addToast("Something went wrong", { appearance: "error" });
+        }
+      });
   };
 
   return (

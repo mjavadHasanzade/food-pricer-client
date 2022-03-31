@@ -8,6 +8,7 @@ import { getAxiosInstanse } from "api/api";
 import type { GetServerSideProps, NextPage } from "next";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
+import { useToasts } from "react-toast-notifications";
 import styled from "styled-components";
 
 interface IEditIngredient {
@@ -21,6 +22,7 @@ const EditIngredient: NextPage<IEditIngredient> = ({ ingredient, id }) => {
   const [price, setPrice] = useState(ingredient.price);
   const [isComplete, setIsComplete] = useState(ingredient.isComplete);
   const router = useRouter();
+  const { addToast } = useToasts();
 
   const handleForm = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,15 +35,25 @@ const EditIngredient: NextPage<IEditIngredient> = ({ ingredient, id }) => {
 
     await getAxiosInstanse()
       .put("ingredients/" + id, ingredient)
-      .then((res) => router.push("/ingredients"))
-      .catch((err) => console.log(err));
+      .then((res) => {
+        addToast(res.data.message, { appearance: "success" });
+        router.push("/ingredients");
+      })
+      .catch((err) => {
+        console.log(err);
+        try {
+          addToast(err.data.message, { appearance: "error" });
+        } catch (error) {
+          addToast("Something went wrong", { appearance: "error" });
+        }
+      });
   };
 
   return (
     <>
       <Seo title="Ingredients"></Seo>
       <Layout translations={""}>
-        <Title>Add New Ingredient</Title>
+        <Title>Edit {ingredient.name}</Title>
         <FormIng className="container">
           <div className="row">
             <div className="col-md-12">

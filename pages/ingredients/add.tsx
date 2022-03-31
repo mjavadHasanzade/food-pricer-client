@@ -8,6 +8,7 @@ import { getAxiosInstanse } from "api/api";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
+import { useToasts } from "react-toast-notifications";
 import styled from "styled-components";
 
 const AddNew: NextPage = () => {
@@ -16,6 +17,7 @@ const AddNew: NextPage = () => {
   const [price, setPrice] = useState("");
   const [isComplete, setIsComplete] = useState(false);
   const router = useRouter();
+  const { addToast } = useToasts();
 
   const handleForm = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,8 +30,18 @@ const AddNew: NextPage = () => {
 
     await getAxiosInstanse()
       .post("ingredients", ingredient)
-      .then((res) => router.push("/ingredients"))
-      .catch((err) => console.log(err));
+      .then((res) => {
+        router.push("/ingredients");
+        addToast(res.data.message, { appearance: "success" });
+      })
+      .catch((err) => {
+        console.log(err);
+        try {
+          addToast(err.data.message, { appearance: "error" });
+        } catch (error) {
+          addToast("Something went wrong", { appearance: "error" });
+        }
+      });
   };
 
   return (
