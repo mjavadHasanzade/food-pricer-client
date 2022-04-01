@@ -42,7 +42,7 @@ const EditIngredient: NextPage<IEditIngredient> = ({ ingredient, id }) => {
       .catch((err) => {
         console.log(err);
         try {
-          addToast(err.data.message, { appearance: "error" });
+          addToast(err.response.data.message, { appearance: "error" });
         } catch (error) {
           addToast("Something went wrong", { appearance: "error" });
         }
