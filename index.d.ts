@@ -1,6 +1,7 @@
 interface IRowsCount<T> {
   count: number;
   rows: {
+    id: number;
     node: T;
   }[];
 }
@@ -10,6 +11,7 @@ interface IIngredient {
   name: string;
   quantity: number;
   price: number;
+  qty?: number;
   isComplete?: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -25,4 +27,15 @@ interface IFood {
   createdAt?: string;
   updatedAt?: string;
   Ingredients?: IIngredient[];
+}
+
+interface ISelects {
+  label: string;
+  value: string | number | boolean;
+}
+[];
+
+interface IPostIngredient {
+  ingId: number;
+  qty: number;
 }
