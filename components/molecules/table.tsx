@@ -8,6 +8,7 @@ import { FiTrash2 } from "react-icons/fi";
 import { getAxiosInstanse } from "api/api";
 import Link from "next/link";
 import { useToasts } from "react-toast-notifications";
+import generateDate from "@/utils/generateDate";
 
 type Props = {
   head?: Array<string>;
@@ -87,7 +88,11 @@ const Table: FC<Props> = ({
             {head &&
               head.length > 0 &&
               head.map((headItem: any, i) => (
-                <span key={i}>{item[headItem]}</span>
+                <span key={i}>
+                  {headItem === "createdAt" || headItem === "updatedAt"
+                    ? generateDate(item[headItem],true)
+                    : item[headItem]}
+                </span>
               ))}
             {actions && (
               <>
@@ -121,7 +126,7 @@ interface ITableContainerST {
   height: string;
 }
 
-const TableContainerST = styled.div<ITableContainerST>`
+export const TableContainerST = styled.div<ITableContainerST>`
   display: flex;
   position: relative;
   flex-direction: column;
