@@ -18,9 +18,11 @@ interface IEditIngredient {
 
 const EditIngredient: NextPage<IEditIngredient> = ({ ingredient, id }) => {
   const [name, setName] = useState(ingredient.name);
-  const [quantity, setQuantity] = useState(ingredient.quantity);
-  const [price, setPrice] = useState(ingredient.price);
-  const [isComplete, setIsComplete] = useState(ingredient.isComplete);
+  const [quantity, setQuantity] = useState<number>(ingredient.quantity);
+  const [price, setPrice] = useState<number>(ingredient.price);
+  const [isComplete, setIsComplete] = useState<boolean>(
+    ingredient.isComplete || false
+  );
   const router = useRouter();
   const { addToast } = useToasts();
 
@@ -69,7 +71,7 @@ const EditIngredient: NextPage<IEditIngredient> = ({ ingredient, id }) => {
                 name="quantity"
                 placeHolder="Quantity"
                 value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
+                onChange={(e) => setQuantity(Number(e.target.value))}
               />
             </div>
             <div className="col-md-12">
@@ -77,7 +79,7 @@ const EditIngredient: NextPage<IEditIngredient> = ({ ingredient, id }) => {
                 name="price"
                 placeHolder="Price"
                 value={price}
-                onChange={(e) => setPrice(e.target.value)}
+                onChange={(e) => setPrice(Number(e.target.value))}
               />
             </div>
             <div className="col-md-12 text-center">
@@ -107,12 +109,14 @@ const FormIng = styled.form`
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const ingredientRes = await fetch(
+    //@ts-ignore
     process.env.NEXT_PUBLIC_API_URL + "ingredients/" + ctx.params.id ||
       "http://localhost:5000"
   );
   const ingredient = await ingredientRes.json();
 
   return {
+    //@ts-ignore
     props: { ingredient, id: ctx.params.id }, // will be passed to the page component as props
   };
 };

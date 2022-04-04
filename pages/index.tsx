@@ -69,6 +69,7 @@ const Home: NextPage<IHome> = ({ foods, ingredients }) => {
                 "updatedAt",
                 "Ingredients",
               ]}
+              tablePath="/foods"
               height="60vh"
             ></Table>
           </div>
@@ -78,6 +79,7 @@ const Home: NextPage<IHome> = ({ foods, ingredients }) => {
               body={ingredients.rows}
               minus={["id", "isComplete", "createdAt", "updatedAt", "Foods"]}
               height="60vh"
+              tablePath="/ingredients"
             ></Table>
           </div>
           <div className="col-md-4">
@@ -86,6 +88,7 @@ const Home: NextPage<IHome> = ({ foods, ingredients }) => {
               body={[]}
               head={["name", "isActive"]}
               height="60vh"
+              tablePath="/menus"
             ></Table>
           </div>
         </Tables>

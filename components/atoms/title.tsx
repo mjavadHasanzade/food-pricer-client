@@ -3,7 +3,7 @@ import React, { FC } from "react";
 import styled from "styled-components";
 
 interface Props {
-  children: string;
+  children: string | React.ReactNode;
   hasBorder?: boolean;
   className?: string;
   important?: "primary" | "secondary" | "thired";
@@ -30,7 +30,7 @@ interface ITitleST {
 }
 
 const TitleST = styled.h3<ITitleST>`
-  padding: .5rem 0;
+  padding: 0.5rem 0;
   padding-top: 0;
   font-size: ${(props) =>
     props.important === "thired"
