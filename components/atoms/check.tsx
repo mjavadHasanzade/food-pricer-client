@@ -9,6 +9,7 @@ interface ICheck {
   name: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   checked: boolean;
+  disabled: boolean;
 }
 
 const Check: FC<ICheck> = ({
@@ -18,6 +19,8 @@ const Check: FC<ICheck> = ({
   checked,
   onChange,
   type = "checkbox",
+  disabled,
+  ...rest
 }) => {
   return (
     <>
@@ -27,6 +30,8 @@ const Check: FC<ICheck> = ({
         name={name}
         onChange={onChange}
         checked={checked}
+        disabled={disabled}
+        {...rest}
       />
       <LabelST htmlFor={name} className={className}>
         <span></span>
@@ -45,7 +50,7 @@ const InputCheck = styled.input`
     + label {
       span {
         background-color: ${theme.colors.primary};
-        transform: scale(1.25); // enlarge the box
+        transform: scale(1.1); // enlarge the box
 
         &:after {
           width: 10px;
@@ -64,7 +69,7 @@ const InputCheck = styled.input`
         // copy the states for onMouseOver to avoid flickering
         span {
           background-color: ${theme.colors.primary};
-          transform: scale(1.25); // enlarge the box
+          transform: scale(1.1); // enlarge the box
 
           &:after {
             width: 10px;
