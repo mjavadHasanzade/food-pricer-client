@@ -15,6 +15,52 @@ import theme from "@/utils/theme";
 import { TableContainerST } from "@/molecules/table";
 import Check from "@/atoms/check";
 
+const selectStyles = {
+  control: (baseStyles: any, state: any) => ({
+    ...baseStyles,
+    background: "#fafafa",
+    // match with the menu
+    borderRadius: 5,
+    cursor: "pointer",
+    border: state.isSelected ? "1px solid #000" : "0.5px solid rgba(0,0,0,0.1)",
+    outline: "none",
+    borderWidth: 0.5,
+    fontSize: 14,
+    margin: "2rem 0 0 0",
+    padding: ".3rem",
+    "&:hover": {
+      border: state.isFocused
+        ? "1px solid rgba(0,0,0,1)"
+        : "0.5px solid rgba(0,0,0,0.1)",
+      boxShadow: state.isFocused ? "none" : "0.5px solid rgba(0,0,0,0.1)",
+    },
+    "&:focus": {
+      border: "1px solid rgba(0,0,0,1)",
+      boxShadow: "0 0 rgba(0,0,0,0.1)",
+    },
+  }),
+  valueContainer: (provided: any, state: any) => ({
+    ...provided,
+    flexWrap: "nowrap",
+  }),
+  option: (baseStyles: any, state: any) => {
+    return {
+      ...baseStyles,
+      color: state.isSelected ? "#fff" : "#000",
+      fontSize: 14,
+      background: state.isSelected ? theme.colors.primary : "#fff",
+      cursor: state.isDisabled ? "not-allowed" : "pointer",
+      "&:hover": {
+        background: `${theme.colors.primary}33`,
+      },
+    };
+  },
+  dropdownIndicator: (base: any) => ({
+    ...base,
+    color: "#7B7B7B", // Custom colour
+  }),
+};
+
 interface IAddNew {
   ingredients: IRowsCount<IIngredient>;
 }
@@ -47,7 +93,10 @@ const AddNew: NextPage<IAddNew> = ({ ingredients: ings }) => {
     setSelectIngredients(ingArr);
   }, [ings.rows]);
 
-  const handleChangeInputs = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeInputs = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    isComplete: boolean
+  ) => {
     const chosenIngs: Array<IIngredient> = [...choosenIngredient];
     const ingredientArray: Array<IPostIngredient> = [...ingredients];
     let pBI = 0;
@@ -80,7 +129,8 @@ const AddNew: NextPage<IAddNew> = ({ ingredients: ings }) => {
 
     choosenIngredient.map((item) => {
       pBI += Math.floor(
-        Number(item.price) * Number(item.qty ? item.qty / 1000 : 0)
+        Number(item.price) *
+          Number(item.qty ? item.qty / (isComplete ? 1 : 1000) : 0)
       );
     });
     setPriceByIngredient(pBI);
@@ -150,6 +200,15 @@ const AddNew: NextPage<IAddNew> = ({ ingredients: ings }) => {
     return () => clearTimeout(timeoutId);
   }, [priceByRestaurant]);
 
+  const handleBenefit = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setBenefit(Number(e.target.value));
+    console.log(Number(e.target.value) / 100);
+
+    setPriceByRestaurant(
+      priceByIngredient + (Number(e.target.value) / 100) * priceByIngredient
+    );
+  };
+
   return (
     <>
       <Seo title="Foods"></Seo>
@@ -173,6 +232,7 @@ const AddNew: NextPage<IAddNew> = ({ ingredients: ings }) => {
                     placeHolder="Price By Restaurant (Auto fill by Benefit)"
                     value={priceByRestaurant}
                     onChange={handlePriceByResturant}
+                    type={"number"}
                   />
                 </div>
                 <div className="col-12">
@@ -181,15 +241,19 @@ const AddNew: NextPage<IAddNew> = ({ ingredients: ings }) => {
                     placeHolder="Price By Ingredient"
                     value={priceByIngredient}
                     readOnly
+                    type={"number"}
                   />
                 </div>
                 <div className="col-md-12">
                   <Input
                     name="benefit"
-                    placeHolder="Benefit (Auto fill by Price By Ingredient)"
+                    placeHolder="Benefit (Auto fill by Price By Resaurant and Ingredients)"
                     value={benefit}
-                    onChange={(e) => setBenefit(Number(e.target.value))}
+                    onChange={(e) => {
+                      handleBenefit(e);
+                    }}
                     className="mx-auto"
+                    type={"number"}
                   />
                 </div>
                 <div className="col-md-12 text-center">
@@ -199,6 +263,7 @@ const AddNew: NextPage<IAddNew> = ({ ingredients: ings }) => {
                     isMulti
                     options={selectIngredients}
                     onChange={handleSelect}
+                    styles={selectStyles}
                   />
                 </div>
               </div>
@@ -212,6 +277,9 @@ const AddNew: NextPage<IAddNew> = ({ ingredients: ings }) => {
                   <span>Is Complete</span>
                   <span>Quantity</span>
                 </TableHead>
+                {choosenIngredient.length <= 0 && (
+                  <NetFoundText>No Items Found</NetFoundText>
+                )}
                 {choosenIngredient.length > 0 &&
                   choosenIngredient.map((item, index) => {
                     return (
@@ -232,7 +300,12 @@ const AddNew: NextPage<IAddNew> = ({ ingredients: ings }) => {
                             type={"number"}
                             name={String(item.id)}
                             step={"1"}
-                            onChange={(e) => handleChangeInputs(e)}
+                            onChange={(e) =>
+                              handleChangeInputs(
+                                e,
+                                item.isComplete ? item.isComplete : false
+                              )
+                            }
                             onKeyDown={
                               item.isComplete
                                 ? (event) =>
@@ -298,6 +371,15 @@ const TableHead = styled(TableItem)`
   top: 0;
   background-color: #fff;
   border-bottom: 2px solid ${theme.colors.primary};
+`;
+
+const NetFoundText = styled.p`
+  color: ${theme.colors.texts};
+  justify-self: center;
+  align-self: center;
+  font-size: 0.9rem;
+  letter-spacing: 0.75px;
+  margin-top: 2rem;
 `;
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
