@@ -14,7 +14,13 @@ interface IInput {
   readOnly?: boolean;
 }
 
-const Input: FC<IInput> = ({ name, placeHolder, type = "text", ...rest }) => {
+const Input: FC<IInput> = ({
+  name,
+  placeHolder,
+  type = "text",
+  className,
+  ...rest
+}) => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const inputRef = useRef() as React.MutableRefObject<HTMLInputElement>;
   const labelRef = useRef() as React.MutableRefObject<HTMLLabelElement>;
@@ -26,6 +32,8 @@ const Input: FC<IInput> = ({ name, placeHolder, type = "text", ...rest }) => {
     else inputRef.current.type = "password";
   };
 
+  // console.log(inputRef.current.value);
+
   return (
     <InputContainer>
       <Inputer
@@ -33,6 +41,7 @@ const Input: FC<IInput> = ({ name, placeHolder, type = "text", ...rest }) => {
         type={type}
         placeholder={placeHolder}
         ref={inputRef}
+        className={`${className} ${inputRef.current?.value ? "active" : ""}`}
         {...rest}
       />
       <Label
@@ -77,6 +86,15 @@ const Inputer = styled.input`
   &:focus + .input-label {
     top: 1rem;
     left: 0;
+    z-index: 1;
+    cursor: pointer;
+  }
+
+  &.active + .input-label {
+    top: 1rem;
+    left: 0;
+    z-index: 1;
+    cursor: pointer;
   }
 `;
 
