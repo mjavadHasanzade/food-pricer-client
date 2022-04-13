@@ -26,7 +26,7 @@ interface IFood {
   benefit: number;
   createdAt?: string;
   updatedAt?: string;
-  Ingredients?: IIngredient[];
+  Ingredients: IIngredient[];
 }
 
 interface ISelects {
