@@ -1,3 +1,4 @@
+const formatNumber = (myNumber: number) => ("0" + myNumber).slice(-2);
 const generateDate = (date: string, timeInclude?: boolean) => {
   try {
     let today = new Date(date);
@@ -13,9 +14,9 @@ const generateDate = (date: string, timeInclude?: boolean) => {
         "/" +
         yyyy +
         " , " +
-        today.getHours() +
+        formatNumber(today.getHours()) +
         ":" +
-        today.getMinutes()
+        formatNumber(today.getMinutes())
       );
     }
 
