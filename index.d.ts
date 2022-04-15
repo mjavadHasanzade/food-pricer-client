@@ -16,6 +16,11 @@ interface IIngredient {
   createdAt?: string;
   updatedAt?: string;
   Foods?: IFood[];
+  FoodByIngredients?: {
+    FoodId: number;
+    IngredientId: number;
+    IngredientQuantity: number;
+  };s
 }
 
 interface IFood {
@@ -27,6 +32,11 @@ interface IFood {
   createdAt?: string;
   updatedAt?: string;
   Ingredients: IIngredient[];
+  FoodByIngredients?: {
+    FoodId: number;
+    IngredientId: number;
+    IngredientQuantity: number;
+  };
 }
 
 interface ISelects {
