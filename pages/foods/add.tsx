@@ -1,5 +1,5 @@
 import Button from "@/atoms/button";
-import Select, { OnChangeValue } from "react-select";
+import Select from "react-select";
 import makeAnimated from "react-select/animated";
 import Input from "@/atoms/input";
 import Title from "@/atoms/title";
@@ -39,10 +39,6 @@ const selectStyles = {
       boxShadow: "0 0 rgba(0,0,0,0.1)",
     },
   }),
-  valueContainer: (provided: any, state: any) => ({
-    ...provided,
-    flexWrap: "nowrap",
-  }),
   option: (baseStyles: any, state: any) => {
     return {
       ...baseStyles,
@@ -61,78 +57,67 @@ const selectStyles = {
   }),
 };
 
-interface IAddNew {
+interface IAddOne {
   ingredients: IRowsCount<IIngredient>;
 }
 
-const AddNew: NextPage<IAddNew> = ({ ingredients: ings }) => {
-  const [name, setName] = useState("");
+const AddOne: NextPage<IAddOne> = ({ ingredients: ings }) => {
+  const [name, setName] = useState<string>();
   const [priceByRestaurant, setPriceByRestaurant] = useState<number>(0);
   const [priceByIngredient, setPriceByIngredient] = useState<number>(0);
-
-  const [selectIngredients, setSelectIngredients] = useState<Array<ISelects>>(
-    []
-  );
 
   const [choosenIngredient, setChoosenIngredient] = useState<
     Array<IIngredient>
   >([]);
 
   const [ingredients, setIngredients] = useState<Array<IPostIngredient>>([]);
-  const [benefit, setBenefit] = useState<number>(0);
+  const [benefit, setBenefit] = useState<number>();
   const router = useRouter();
   const { addToast } = useToasts();
 
   const animatedComponents = makeAnimated();
 
-  useEffect(() => {
-    const ingArr: Array<ISelects> = [];
-    ings.rows.map((item: any) => {
-      ingArr.push({ value: item.id, label: item.name });
-    });
-    setSelectIngredients(ingArr);
-  }, [ings.rows]);
-
-  const handleChangeInputs = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    isComplete: boolean
-  ) => {
+  const handleChangeInputs = () => {
+    const inputs = document.querySelectorAll<HTMLInputElement>(".inputIngQTY");
     const chosenIngs: Array<IIngredient> = [...choosenIngredient];
-    const ingredientArray: Array<IPostIngredient> = [...ingredients];
+    let ingredientArray: Array<IPostIngredient> = [];
     let pBI = 0;
 
-    let index = ingredientArray.findIndex(
-      (itm) => itm.ingId == Number(e.target.name)
-    );
+    //? handle the ings Array
+    Array.from(inputs).map((item: HTMLInputElement, index: number) => {
+      let indx = ingredientArray.findIndex(
+        (itm) => itm.ingId == Number(item.name)
+      );
+      if (indx >= 0) {
+        let indexFinded = ingredientArray[indx];
+        indexFinded.qty = Number(item.value);
+        ingredientArray[indx] = indexFinded;
+      } else {
+        ingredientArray.push({
+          qty: Number(item.value),
+          ingId: Number(item.name),
+        });
+      }
+    });
 
-    if (index >= 0) {
-      let indexFinded = ingredientArray[index];
-      indexFinded.qty = Number(e.target.value);
-      ingredientArray[index] = indexFinded;
-      chosenIngs.map((item) => {
-        if (item.id == Number(e.target.name)) {
-          item.qty = Number(e.target.value);
+    setIngredients(ingredientArray);
+
+    //? add qty to ings Array
+    ingredientArray.map((item) => {
+      chosenIngs.map((cItem) => {
+        if (cItem.id == item.ingId) {
+          cItem.qty = item.qty;
         }
       });
-    } else {
-      ingredientArray.push({
-        ingId: Number(e.target.name),
-        qty: Number(e.target.value),
-      });
-      chosenIngs.map((item) => {
-        if (item.id == Number(e.target.name)) {
-          item.qty = Number(e.target.value);
-        }
-      });
-      setIngredients(ingredientArray);
-    }
+    });
 
-    choosenIngredient.map((item) => {
+    chosenIngs.map((item) => {
       pBI += Math.floor(
         Number(item.price) *
-          Number(item.qty ? item.qty / (isComplete ? 1 : 1000) : 0)
+          Number(item.qty ? item.qty / (item.isComplete ? 1 : 1000) : 0)
       );
     });
+
     setPriceByIngredient(pBI);
     if (!priceByRestaurant) {
       addToast("Fill Price By resaurant to calculate the benefit", {
@@ -142,10 +127,44 @@ const AddNew: NextPage<IAddNew> = ({ ingredients: ings }) => {
       let bnft = priceByRestaurant / pBI;
       setBenefit(Math.floor((bnft == 0 ? 0 : bnft - 1) * 100));
     }
+    ingredientArray = [];
+  };
+
+  const handleSelect = (selectedOption: any) => {
+    if (selectedOption.length <= 0) {
+      setPriceByIngredient(0);
+      setBenefit(0);
+      setIngredients([]);
+      return setChoosenIngredient([]);
+    }
+    const ingArr: Array<IIngredient> = [];
+    selectedOption.map((item: any) => {
+      //@ts-ignore
+      return ingArr.push(ings.rows.find((f) => f.id == item.id));
+    });
+    setChoosenIngredient(ingArr);
+    setTimeout(() => {
+      handleChangeInputs();
+    }, 1000);
   };
 
   const handleForm = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (priceByRestaurant <= 0) {
+      addToast("Price By Restaurant Can Not be 0 or Negative", {
+        appearance: "error",
+      });
+      return false;
+    }
+
+    if (priceByIngredient <= 0) {
+      addToast("Price By Ingredient Can Not be 0 or Negative", {
+        appearance: "error",
+      });
+      return false;
+    }
+
     const ingredient = {
       name,
       priceByRestaurant,
@@ -169,19 +188,6 @@ const AddNew: NextPage<IAddNew> = ({ ingredients: ings }) => {
       });
   };
 
-  const handleSelect = (selectedOption: any) => {
-    if (selectedOption.length <= 0) {
-      setIngredients([]);
-      return setChoosenIngredient([]);
-    }
-    const ingArr: Array<IIngredient> = [];
-    selectedOption.map((item: any) => {
-      //@ts-ignore
-      return ingArr.push(ings.rows.find((f) => f.id == item.value));
-    });
-    setChoosenIngredient(ingArr);
-  };
-
   const handlePriceByResturant = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPriceByRestaurant(Number(e.target.value));
   };
@@ -202,7 +208,6 @@ const AddNew: NextPage<IAddNew> = ({ ingredients: ings }) => {
 
   const handleBenefit = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBenefit(Number(e.target.value));
-    console.log(Number(e.target.value) / 100);
 
     setPriceByRestaurant(
       priceByIngredient + (Number(e.target.value) / 100) * priceByIngredient
@@ -211,9 +216,9 @@ const AddNew: NextPage<IAddNew> = ({ ingredients: ings }) => {
 
   return (
     <>
-      <Seo title="Foods"></Seo>
+      <Seo title="Add Food"></Seo>
       <Layout translations={""}>
-        <Title>Add New Food</Title>
+        <Title>Add Food</Title>
         <FormIng className="container">
           <div className="row">
             <div className="col-md-5">
@@ -261,9 +266,14 @@ const AddNew: NextPage<IAddNew> = ({ ingredients: ings }) => {
                     closeMenuOnSelect={false}
                     components={animatedComponents}
                     isMulti
-                    options={selectIngredients}
+                    options={ings.rows}
                     onChange={handleSelect}
                     styles={selectStyles}
+                    instanceId={"food_ingss"}
+                    //@ts-ignore
+                    getOptionLabel={(option) => option.name}
+                    //@ts-ignore
+                    getOptionValue={(option) => option.id}
                   />
                 </div>
               </div>
@@ -300,12 +310,8 @@ const AddNew: NextPage<IAddNew> = ({ ingredients: ings }) => {
                             type={"number"}
                             name={String(item.id)}
                             step={"1"}
-                            onChange={(e) =>
-                              handleChangeInputs(
-                                e,
-                                item.isComplete ? item.isComplete : false
-                              )
-                            }
+                            className="inputIngQTY"
+                            onChange={() => handleChangeInputs()}
                             onKeyDown={
                               item.isComplete
                                 ? (event) =>
@@ -329,7 +335,7 @@ const AddNew: NextPage<IAddNew> = ({ ingredients: ings }) => {
   );
 };
 
-export default AddNew;
+export default AddOne;
 
 const FormIng = styled.form`
   max-width: 85%;
