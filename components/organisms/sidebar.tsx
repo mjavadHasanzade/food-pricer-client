@@ -7,15 +7,21 @@ import { IoIosNutrition } from "react-icons/io";
 import { GiMeal } from "react-icons/gi";
 import { TiDocumentText } from "react-icons/ti";
 import { useRouter } from "next/router";
+import { useAppContext } from "context/app-context";
 
 type Props = {};
 
 const Sidebar = (props: Props) => {
   const router = useRouter();
+  const { setLoaderActiver, loaderActive } = useAppContext();
 
   return (
     <SidebarContainerST>
-      <ImgMain src="/img/pizza-main.png" />
+      <ImgMain
+        className={loaderActive ? "active" : ""}
+        src="/img/pizza-main.png"
+        onClick={() => setLoaderActiver(!loaderActive)}
+      />
       <SidebarItemsST>
         <p className="pTitle">Menu</p>
 
@@ -68,6 +74,23 @@ const ImgMain = styled.img`
   box-shadow: 0 0 20px -10px ${theme.colors.primary};
   border-radius: 50%;
   margin: 2rem auto;
+  transition: 0.5s ease all;
+
+  @keyframes rote {
+    0% {
+      transform: rotateZ(0deg);
+    }
+    50% {
+      transform: rotateZ(180deg);
+    }
+    100% {
+      transform: rotateZ(360deg);
+    }
+  }
+
+  &.active {
+    animation: rote 2s ease infinite;
+  }
 `;
 
 const SidebarItemsST = styled.div`

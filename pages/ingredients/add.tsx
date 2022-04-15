@@ -5,6 +5,7 @@ import Title from "@/atoms/title";
 import Seo from "@/molecules/seo";
 import Layout from "@/organisms/layout";
 import { getAxiosInstanse } from "api/api";
+import { useAppContext } from "context/app-context";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
@@ -18,6 +19,7 @@ const AddNew: NextPage = () => {
   const [isComplete, setIsComplete] = useState(false);
   const router = useRouter();
   const { addToast } = useToasts();
+  const { setLoaderActiver } = useAppContext();
 
   const handleForm = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +30,7 @@ const AddNew: NextPage = () => {
       isComplete: isComplete,
     };
 
+    setLoaderActiver(true);
     await getAxiosInstanse()
       .post("ingredients", ingredient)
       .then((res) => {
@@ -40,6 +43,9 @@ const AddNew: NextPage = () => {
         } catch (error) {
           addToast("Something went wrong", { appearance: "error" });
         }
+      })
+      .finally(() => {
+        setLoaderActiver(false);
       });
   };
 

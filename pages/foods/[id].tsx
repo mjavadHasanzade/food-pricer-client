@@ -14,6 +14,7 @@ import styled from "styled-components";
 import theme from "@/utils/theme";
 import { TableContainerST } from "@/molecules/table";
 import Check from "@/atoms/check";
+import { useAppContext } from "context/app-context";
 
 const selectStyles = {
   control: (baseStyles: any, state: any) => ({
@@ -80,6 +81,7 @@ const EditOne: NextPage<IEditOne> = ({ ingredients: ings, food, id }) => {
   const [benefit, setBenefit] = useState<number>(food.benefit);
   const router = useRouter();
   const { addToast } = useToasts();
+  const { setLoaderActiver } = useAppContext();
 
   const animatedComponents = makeAnimated();
 
@@ -187,6 +189,7 @@ const EditOne: NextPage<IEditOne> = ({ ingredients: ings, food, id }) => {
       benefit,
     };
 
+    setLoaderActiver(true);
     await getAxiosInstanse()
       .put("foods/" + id, ingredient)
       .then((res) => {
@@ -199,6 +202,9 @@ const EditOne: NextPage<IEditOne> = ({ ingredients: ings, food, id }) => {
         } catch (error) {
           addToast("Something went wrong", { appearance: "error" });
         }
+      })
+      .finally(() => {
+        setLoaderActiver(false);
       });
   };
 

@@ -5,6 +5,7 @@ import Title from "@/atoms/title";
 import Seo from "@/molecules/seo";
 import Layout from "@/organisms/layout";
 import { getAxiosInstanse } from "api/api";
+import { useAppContext } from "context/app-context";
 import type { GetServerSideProps, NextPage } from "next";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
@@ -25,6 +26,7 @@ const EditIngredient: NextPage<IEditIngredient> = ({ ingredient, id }) => {
   );
   const router = useRouter();
   const { addToast } = useToasts();
+  const { setLoaderActiver } = useAppContext();
 
   const handleForm = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +36,7 @@ const EditIngredient: NextPage<IEditIngredient> = ({ ingredient, id }) => {
       price: price,
       isComplete: isComplete,
     };
-
+    setLoaderActiver(true);
     await getAxiosInstanse()
       .put("ingredients/" + id, ingredient)
       .then((res) => {
@@ -48,6 +50,9 @@ const EditIngredient: NextPage<IEditIngredient> = ({ ingredient, id }) => {
         } catch (error) {
           addToast("Something went wrong", { appearance: "error" });
         }
+      })
+      .finally(() => {
+        setLoaderActiver(false);
       });
   };
 

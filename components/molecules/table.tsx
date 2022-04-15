@@ -9,6 +9,7 @@ import { getAxiosInstanse } from "api/api";
 import Link from "next/link";
 import { useToasts } from "react-toast-notifications";
 import generateDate from "@/utils/generateDate";
+import { useAppContext } from "context/app-context";
 
 type Props = {
   head?: Array<string>;
@@ -36,6 +37,7 @@ const Table: FC<Props> = ({
 }) => {
   const [tableBody, setTableBody] = useState(body);
   const { addToast } = useToasts();
+  const { setLoaderActiver } = useAppContext();
 
   if (minus.length >= 1) {
     head = objectExtracter(tableBody.length > 1 ? tableBody[0] : {}, minus);
@@ -46,6 +48,7 @@ const Table: FC<Props> = ({
   let cols = head.length;
 
   const deleteItem = (path: string, id: number | string) => {
+    setLoaderActiver(true);
     getAxiosInstanse()
       .delete(path + id)
       .then((res) => {
@@ -61,6 +64,9 @@ const Table: FC<Props> = ({
         } catch (error) {
           addToast("Something went wrong", { appearance: "error" });
         }
+      })
+      .finally(() => {
+        setLoaderActiver(false);
       });
   };
 
@@ -90,7 +96,7 @@ const Table: FC<Props> = ({
               head.map((headItem: any, i) => (
                 <span key={i}>
                   {headItem === "createdAt" || headItem === "updatedAt"
-                    ? generateDate(item[headItem],true)
+                    ? generateDate(item[headItem], true)
                     : item[headItem]}
                 </span>
               ))}
