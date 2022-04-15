@@ -1,6 +1,6 @@
 import theme from "@/utils/theme";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 import { BiBarChartSquare } from "react-icons/bi";
 import { IoIosNutrition } from "react-icons/io";
@@ -15,13 +15,28 @@ const Sidebar = (props: Props) => {
   const router = useRouter();
   const { setLoaderActiver, loaderActive } = useAppContext();
 
+  useEffect(() => {
+    const Parallaxify = require("pure-parallaxify").default;
+    const NewParallaxify = new Parallaxify(
+      {
+        positionProperty: "transform",
+      },
+      "#my-wrapper"
+    );
+    return () => NewParallaxify.destroy();
+  }, []);
+
   return (
     <SidebarContainerST>
-      <ImgMain
-        className={loaderActive ? "active" : ""}
-        src="/img/pizza-main.png"
-        onClick={() => setLoaderActiver(!loaderActive)}
-      />
+      <PLWrapper id="my-wrapper">
+        <ImgMain
+          className={loaderActive ? "active" : ""}
+          src="/img/pizza-main.png"
+          data-parallaxify-range-x="-75"
+          data-parallaxify-range-y="-75"
+          onClick={() => setLoaderActiver(!loaderActive)}
+        />
+      </PLWrapper>
       <SidebarItemsST>
         <p className="pTitle">Menu</p>
 
@@ -68,8 +83,13 @@ const SidebarContainerST = styled.div`
   justify-content: start;
 `;
 
+const PLWrapper = styled.div`
+  width: 70%;
+  margin: 0 auto;
+`;
+
 const ImgMain = styled.img`
-  width: 60%;
+  width: 100%;
   height: auto;
   box-shadow: 0 0 20px -10px ${theme.colors.primary};
   border-radius: 50%;
