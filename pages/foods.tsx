@@ -13,7 +13,7 @@ interface IIngredients {
 const Ingredients: NextPage<IIngredients> = ({ ingredients }) => {
   return (
     <>
-      <Seo title="Ingredients"></Seo>
+      <Seo title="Foods"></Seo>
       <Layout translations={""}>
         <Title>Foods</Title>
 
