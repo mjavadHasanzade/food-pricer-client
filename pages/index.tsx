@@ -2,13 +2,14 @@ import Title from "@/atoms/title";
 import Detail from "@/molecules/detail";
 import Seo from "@/molecules/seo";
 import Layout from "@/organisms/layout";
-import type { NextPage } from "next";
+import type { GetServerSideProps, NextPage } from "next";
 import styled from "styled-components";
 import { MdOutlineGrain, MdShoppingCart } from "react-icons/md";
 import { GiHotMeal } from "react-icons/gi";
 import { AiFillStar } from "react-icons/ai";
 import theme from "@/utils/theme";
 import Table from "@/molecules/table";
+import authMiddleware from "middlewares/auth";
 
 interface IHome {
   foods: IRowsCount<IFood>;
@@ -68,6 +69,7 @@ const Home: NextPage<IHome> = ({ foods, ingredients }) => {
                 "createdAt",
                 "updatedAt",
                 "Ingredients",
+                "UserId",
               ]}
               tablePath="/foods"
               height="60vh"
@@ -77,7 +79,14 @@ const Home: NextPage<IHome> = ({ foods, ingredients }) => {
             <Table
               title="Ingredients"
               body={ingredients.rows}
-              minus={["id", "isComplete", "createdAt", "updatedAt", "Foods"]}
+              minus={[
+                "id",
+                "isComplete",
+                "createdAt",
+                "updatedAt",
+                "Foods",
+                "UserId",
+              ]}
               height="60vh"
               tablePath="/ingredients"
             ></Table>
@@ -86,7 +95,7 @@ const Home: NextPage<IHome> = ({ foods, ingredients }) => {
             <Table
               title="Menus"
               body={[]}
-              head={["name", "isActive"]}
+              head={["name", "isActive", "UserId"]}
               height="60vh"
               tablePath="/menus"
             ></Table>
@@ -108,18 +117,54 @@ const DetailsContainer = styled.div`
 
 const Tables = styled.div``;
 
-export async function getServerSideProps() {
-  const foodRes = await fetch(
-    process.env.NEXT_PUBLIC_API_URL + "foods" || "http://localhost:5000"
-  );
-  const foods = await foodRes.json();
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+  const auth = authMiddleware(req.headers.cookie || "");
+  if (auth.auth) {
+    try {
+      const foodRes = await fetch(
+        process.env.NEXT_PUBLIC_API_URL + "foods" || "http://localhost:5000",
+        {
+          headers: {
+            "x-auth": auth.token,
+          },
+        }
+      );
+      if (foodRes.status >= 300) throw new Error(foodRes.statusText);
+      const foods = await foodRes.json();
 
-  const ingredientRes = await fetch(
-    process.env.NEXT_PUBLIC_API_URL + "ingredients" || "http://localhost:5000"
-  );
-  const ingredients = await ingredientRes.json();
+      const ingredientRes = await fetch(
+        process.env.NEXT_PUBLIC_API_URL + "ingredients" ||
+          "http://localhost:5000",
+        {
+          headers: {
+            "x-auth": auth.token,
+          },
+        }
+      );
 
-  return {
-    props: { foods, ingredients }, // will be passed to the page component as props
-  };
-}
+      if (ingredientRes.status >= 300)
+        throw new Error(ingredientRes.statusText);
+      const ingredients = await ingredientRes.json();
+
+      return {
+        props: { foods, ingredients }, // will be passed to the page component as props
+      };
+    } catch (error) {
+      return {
+        redirect: {
+          permanent: false,
+          destination: "/login",
+        },
+        props: {},
+      };
+    }
+  } else {
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/login",
+      },
+      props: {},
+    };
+  }
+};

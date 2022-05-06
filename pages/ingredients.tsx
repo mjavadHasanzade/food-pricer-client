@@ -3,7 +3,8 @@ import Title from "@/atoms/title";
 import Seo from "@/molecules/seo";
 import Table from "@/molecules/table";
 import Layout from "@/organisms/layout";
-import type { NextPage } from "next";
+import authMiddleware from "middlewares/auth";
+import type { GetServerSideProps, NextPage } from "next";
 import Link from "next/link";
 
 interface IIngredients {
@@ -26,7 +27,7 @@ const Ingredients: NextPage<IIngredients> = ({ ingredients }) => {
         <Table
           body={ingredients.rows}
           height="70vh"
-          minus={["id", "isComplete", "Foods"]}
+          minus={["id", "isComplete", "Foods", "UserId"]}
           actions={true}
           tablePath="ingredients/"
         />
@@ -37,13 +38,30 @@ const Ingredients: NextPage<IIngredients> = ({ ingredients }) => {
 
 export default Ingredients;
 
-export async function getServerSideProps() {
-  const ingredientRes = await fetch(
-    process.env.NEXT_PUBLIC_API_URL + "ingredients" || "http://localhost:5000"
-  );
-  const ingredients = await ingredientRes.json();
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+  const auth = authMiddleware(req.headers.cookie || "");
+  if (auth.auth) {
+    const ingredientRes = await fetch(
+      process.env.NEXT_PUBLIC_API_URL + "ingredients" ||
+        "http://localhost:5000",
+      {
+        headers: {
+          "x-auth": auth.token,
+        },
+      }
+    );
+    const ingredients = await ingredientRes.json();
 
-  return {
-    props: { ingredients }, // will be passed to the page component as props
-  };
-}
+    return {
+      props: { ingredients }, // will be passed to the page component as props
+    };
+  } else {
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/login",
+      },
+      props: {},
+    };
+  }
+};
