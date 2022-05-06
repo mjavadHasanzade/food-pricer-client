@@ -113,6 +113,7 @@ const GlobalStyle = createGlobalStyle`
 interface ILayout {
   children?: React.ReactNode;
   isInnerPage?: boolean;
+  isLogin?: boolean;
   translations: any;
 }
 
@@ -120,6 +121,7 @@ const Layout: FC<ILayout> = ({
   children,
   translations,
   isInnerPage = false,
+  isLogin = true,
 }) => {
   const { locale } = useRouter();
   const isRtl = locale === "fa";
@@ -134,8 +136,8 @@ const Layout: FC<ILayout> = ({
       <GlobalStyle />
       <Menu />
       {children && (
-        <Main>
-          <Sidebar />
+        <Main isLogin={isLogin}>
+          {isLogin && <Sidebar />}
           <div className="childrenContent">{children}</div>
         </Main>
       )}
@@ -145,11 +147,15 @@ const Layout: FC<ILayout> = ({
 
 export default Layout;
 
-const Main = styled.main`
+interface IMain {
+  isLogin: boolean;
+}
+const Main = styled.main<IMain>`
   display: flex;
+  min-height: calc(100vh - 64px);
   .childrenContent {
     padding: 1rem 2rem;
-    width: 80%;
-    flex: 0 0 80%;
+    width: ${(props) => (props.isLogin ? "80%" : "100%")};
+    flex: 0 0 ${(props) => (props.isLogin ? "80%" : "100%")};
   }
 `;
