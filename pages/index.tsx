@@ -14,9 +14,10 @@ import authMiddleware from "middlewares/auth";
 interface IHome {
   foods: IRowsCount<IFood>;
   ingredients: IRowsCount<IIngredient>;
+  menus: IRowsCount<IMenus>;
 }
 
-const Home: NextPage<IHome> = ({ foods, ingredients }) => {
+const Home: NextPage<IHome> = ({ foods, ingredients, menus }) => {
   return (
     <>
       <Seo title="Home"></Seo>
@@ -40,7 +41,7 @@ const Home: NextPage<IHome> = ({ foods, ingredients }) => {
           <Detail
             title="Menu"
             color={Math.floor(Math.random() * 16777215).toString(16)}
-            qty={2}
+            qty={menus.count}
           >
             <AiFillStar />
           </Detail>
@@ -94,8 +95,8 @@ const Home: NextPage<IHome> = ({ foods, ingredients }) => {
           <div className="col-md-4">
             <Table
               title="Menus"
-              body={[]}
-              head={["name", "isActive", "UserId"]}
+              body={menus.rows}
+              minus={["UserId", "Foods", "id", "createdAt", "updatedAt"]}
               height="60vh"
               tablePath="/menus"
             ></Table>
@@ -129,7 +130,6 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
           },
         }
       );
-      if (foodRes.status >= 300) throw new Error(foodRes.statusText);
       const foods = await foodRes.json();
 
       const ingredientRes = await fetch(
@@ -141,13 +141,20 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
           },
         }
       );
-
-      if (ingredientRes.status >= 300)
-        throw new Error(ingredientRes.statusText);
       const ingredients = await ingredientRes.json();
 
+      const menusRes = await fetch(
+        process.env.NEXT_PUBLIC_API_URL + "menus" || "http://localhost:5000",
+        {
+          headers: {
+            "x-auth": auth.token,
+          },
+        }
+      );
+      const menus = await menusRes.json();
+
       return {
-        props: { foods, ingredients }, // will be passed to the page component as props
+        props: { foods, ingredients, menus }, // will be passed to the page component as props
       };
     } catch (error) {
       return {

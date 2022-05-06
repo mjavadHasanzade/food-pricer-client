@@ -20,7 +20,8 @@ interface IIngredient {
     FoodId: number;
     IngredientId: number;
     IngredientQuantity: number;
-  };s
+  };
+  s;
 }
 
 interface IFood {
@@ -48,4 +49,10 @@ interface ISelects {
 interface IPostIngredient {
   ingId: number;
   qty: number;
+}
+
+interface IMenus {
+  name: string;
+  foods: IFood[];
+  isActive: boolean;
 }
