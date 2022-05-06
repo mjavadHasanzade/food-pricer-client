@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useToasts } from "react-toast-notifications";
 import generateDate from "@/utils/generateDate";
 import { useAppContext } from "context/app-context";
+import Check from "@/atoms/check";
 
 type Props = {
   head?: Array<string>;
@@ -40,7 +41,7 @@ const Table: FC<Props> = ({
   const { setLoaderActiver } = useAppContext();
 
   if (minus.length >= 1) {
-    head = objectExtracter(tableBody.length > 1 ? tableBody[0] : {}, minus);
+    head = objectExtracter(tableBody.length >= 1 ? tableBody[0] : {}, minus);
   } else {
     head = objectExtracter(tableBody[0], [""]);
   }
@@ -70,6 +71,8 @@ const Table: FC<Props> = ({
       });
   };
 
+  console.log(head);
+
   return (
     <div>
       {title && (
@@ -95,9 +98,13 @@ const Table: FC<Props> = ({
               head.length > 0 &&
               head.map((headItem: any, i) => (
                 <span key={i}>
-                  {headItem === "createdAt" || headItem === "updatedAt"
-                    ? generateDate(item[headItem], true)
-                    : item[headItem]}
+                  {headItem === "createdAt" || headItem === "updatedAt" ? (
+                    generateDate(item[headItem], true)
+                  ) : typeof item[headItem] === "boolean" ? (
+                    <Check checked={item[headItem]} label="" name="isActive" />
+                  ) : (
+                    item[headItem]
+                  )}
                 </span>
               ))}
             {actions && (
