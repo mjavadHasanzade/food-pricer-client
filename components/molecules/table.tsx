@@ -1,7 +1,7 @@
 import Title from "@/atoms/title";
 import objectExtracter from "@/utils/objectExtracter";
 import theme from "@/utils/theme";
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import styled from "styled-components";
 import { BiPencil } from "react-icons/bi";
 import { FiTrash2 } from "react-icons/fi";
@@ -11,6 +11,7 @@ import { useToasts } from "react-toast-notifications";
 import generateDate from "@/utils/generateDate";
 import { useAppContext } from "context/app-context";
 import Check from "@/atoms/check";
+import { getCookie } from "@/utils/setCookie";
 
 type Props = {
   head?: Array<string>;
@@ -39,6 +40,7 @@ const Table: FC<Props> = ({
   const [tableBody, setTableBody] = useState(body);
   const { addToast } = useToasts();
   const { setLoaderActiver } = useAppContext();
+  let token: string;
 
   if (minus.length >= 1) {
     head = objectExtracter(tableBody.length >= 1 ? tableBody[0] : {}, minus);
@@ -48,14 +50,22 @@ const Table: FC<Props> = ({
 
   let cols = head.length;
 
-  const deleteItem = (path: string, id: number | string) => {
+  const deleteItem = async (path: string, id: number | string) => {
     setLoaderActiver(true);
     getAxiosInstanse()
-      .delete(path + id)
+      .delete(path + id, {
+        headers: {
+          "x-auth": getCookie("token"),
+        },
+      })
       .then((res) => {
         addToast(res.data.message, { appearance: "success" });
         getAxiosInstanse()
-          .get(path)
+          .get(path, {
+            headers: {
+              "x-auth": getCookie("token"),
+            },
+          })
           .then((res2) => setTableBody(res2.data.rows));
       })
       .catch((err) => {
@@ -70,8 +80,6 @@ const Table: FC<Props> = ({
         setLoaderActiver(false);
       });
   };
-
-  console.log(head);
 
   return (
     <div>

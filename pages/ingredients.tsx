@@ -3,6 +3,7 @@ import Title from "@/atoms/title";
 import Seo from "@/molecules/seo";
 import Table from "@/molecules/table";
 import Layout from "@/organisms/layout";
+import { getCookie } from "@/utils/setCookie";
 import authMiddleware from "middlewares/auth";
 import type { GetServerSideProps, NextPage } from "next";
 import Link from "next/link";
@@ -27,7 +28,7 @@ const Ingredients: NextPage<IIngredients> = ({ ingredients }) => {
         <Table
           body={ingredients.rows}
           height="70vh"
-          minus={["id", "isComplete", "Foods", "UserId"]}
+          minus={["id", "Foods", "UserId"]}
           actions={true}
           tablePath="ingredients/"
         />

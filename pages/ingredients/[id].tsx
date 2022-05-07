@@ -4,8 +4,10 @@ import Input from "@/atoms/input";
 import Title from "@/atoms/title";
 import Seo from "@/molecules/seo";
 import Layout from "@/organisms/layout";
+import { getCookie } from "@/utils/setCookie";
 import { getAxiosInstanse } from "api/api";
 import { useAppContext } from "context/app-context";
+import authMiddleware from "middlewares/auth";
 import type { GetServerSideProps, NextPage } from "next";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
@@ -38,7 +40,11 @@ const EditIngredient: NextPage<IEditIngredient> = ({ ingredient, id }) => {
     };
     setLoaderActiver(true);
     await getAxiosInstanse()
-      .put("ingredients/" + id, ingredient)
+      .put("ingredients/" + id, ingredient, {
+        headers: {
+          "x-auth": getCookie("token"),
+        },
+      })
       .then((res) => {
         addToast(res.data.message, { appearance: "success" });
         router.push("/ingredients");
@@ -112,16 +118,36 @@ const FormIng = styled.form`
   max-width: 50%;
 `;
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const ingredientRes = await fetch(
-    //@ts-ignore
-    process.env.NEXT_PUBLIC_API_URL + "ingredients/" + ctx.params.id ||
-      "http://localhost:5000"
-  );
-  const ingredient = await ingredientRes.json();
+export const getServerSideProps: GetServerSideProps = async ({
+  req,
+  res,
+  params,
+}) => {
+  const auth = authMiddleware(req.headers.cookie || "");
+  if (auth.auth) {
+    const ingredientRes = await fetch(
+      //@ts-ignore
+      process.env.NEXT_PUBLIC_API_URL + "ingredients/" + params.id ||
+        "http://localhost:5000",
+      {
+        headers: {
+          "x-auth": auth.token,
+        },
+      }
+    );
+    const ingredient = await ingredientRes.json();
 
-  return {
-    //@ts-ignore
-    props: { ingredient, id: ctx.params.id }, // will be passed to the page component as props
-  };
+    return {
+      //@ts-ignore
+      props: { ingredient, id: params.id }, // will be passed to the page component as props
+    };
+  } else {
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/login",
+      },
+      props: {},
+    };
+  }
 };

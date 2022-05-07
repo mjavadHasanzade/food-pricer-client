@@ -4,6 +4,7 @@ import Input from "@/atoms/input";
 import Title from "@/atoms/title";
 import Seo from "@/molecules/seo";
 import Layout from "@/organisms/layout";
+import { getCookie } from "@/utils/setCookie";
 import { getAxiosInstanse } from "api/api";
 import { useAppContext } from "context/app-context";
 import type { NextPage } from "next";
@@ -31,8 +32,13 @@ const AddNew: NextPage = () => {
     };
 
     setLoaderActiver(true);
+    const token = getCookie("token");
     await getAxiosInstanse()
-      .post("ingredients", ingredient)
+      .post("ingredients", ingredient, {
+        headers: {
+          "x-auth": token,
+        },
+      })
       .then((res) => {
         router.push("/ingredients");
         addToast(res.data.message, { appearance: "success" });

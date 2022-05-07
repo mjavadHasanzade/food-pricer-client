@@ -15,6 +15,8 @@ import theme from "@/utils/theme";
 import { TableContainerST } from "@/molecules/table";
 import Check from "@/atoms/check";
 import { useAppContext } from "context/app-context";
+import { getCookie } from "@/utils/setCookie";
+import authMiddleware from "middlewares/auth";
 
 const selectStyles = {
   control: (baseStyles: any, state: any) => ({
@@ -176,7 +178,11 @@ const AddOne: NextPage<IAddOne> = ({ ingredients: ings }) => {
     };
     setLoaderActiver(true);
     await getAxiosInstanse()
-      .post("foods", ingredient)
+      .post("foods", ingredient, {
+        headers: {
+          "x-auth": getCookie("token"),
+        },
+      })
       .then((res) => {
         router.push("/foods");
         addToast(res.data.message, { appearance: "success" });
@@ -393,13 +399,30 @@ const NetFoundText = styled.p`
   margin-top: 2rem;
 `;
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const ingredientsRes = await fetch(
-    process.env.NEXT_PUBLIC_API_URL + "ingredients/" || "http://localhost:5000"
-  );
-  const ingredients = await ingredientsRes.json();
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+  const auth = authMiddleware(req.headers.cookie || "");
+  if (auth.auth) {
+    const ingredientsRes = await fetch(
+      process.env.NEXT_PUBLIC_API_URL + "ingredients/" ||
+        "http://localhost:5000",
+      {
+        headers: {
+          "x-auth": auth.token,
+        },
+      }
+    );
+    const ingredients = await ingredientsRes.json();
 
-  return {
-    props: { ingredients }, // will be passed to the page component as props
-  };
+    return {
+      props: { ingredients }, // will be passed to the page component as props
+    };
+  } else {
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/login",
+      },
+      props: {},
+    };
+  }
 };

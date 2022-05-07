@@ -15,6 +15,8 @@ import theme from "@/utils/theme";
 import { TableContainerST } from "@/molecules/table";
 import Check from "@/atoms/check";
 import { useAppContext } from "context/app-context";
+import authMiddleware from "middlewares/auth";
+import { getCookie } from "@/utils/setCookie";
 
 const selectStyles = {
   control: (baseStyles: any, state: any) => ({
@@ -191,7 +193,11 @@ const EditOne: NextPage<IEditOne> = ({ ingredients: ings, food, id }) => {
 
     setLoaderActiver(true);
     await getAxiosInstanse()
-      .put("foods/" + id, ingredient)
+      .put("foods/" + id, ingredient, {
+        headers: {
+          "x-auth": getCookie("token"),
+        },
+      })
       .then((res) => {
         router.push("/foods");
         addToast(res.data.message, { appearance: "success" });
@@ -238,7 +244,7 @@ const EditOne: NextPage<IEditOne> = ({ ingredients: ings, food, id }) => {
     <>
       <Seo title={"Edit " + food.name}></Seo>
       <Layout translations={""}>
-        <Title>Edit Food</Title>
+        <Title>Edit {food.name}</Title>
         <FormIng className="container">
           <div className="row">
             <div className="col-md-5">
@@ -414,21 +420,47 @@ const NetFoundText = styled.p`
   margin-top: 2rem;
 `;
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const foodRes = await fetch(
-    //@ts-ignore
-    process.env.NEXT_PUBLIC_API_URL + "foods/" + ctx.params.id
-  );
+export const getServerSideProps: GetServerSideProps = async ({
+  req,
+  res,
+  params,
+}) => {
+  const auth = authMiddleware(req.headers.cookie || "");
+  if (auth.auth) {
+    const foodRes = await fetch(
+      //@ts-ignore
+      process.env.NEXT_PUBLIC_API_URL + "foods/" + params.id,
+      {
+        headers: {
+          "x-auth": auth.token,
+        },
+      }
+    );
 
-  const food = await foodRes.json();
+    const food = await foodRes.json();
 
-  const ingredientsRes = await fetch(
-    process.env.NEXT_PUBLIC_API_URL + "ingredients/" || "http://localhost:5000"
-  );
-  const ingredients = await ingredientsRes.json();
+    const ingredientsRes = await fetch(
+      process.env.NEXT_PUBLIC_API_URL + "ingredients/" ||
+        "http://localhost:5000",
+      {
+        headers: {
+          "x-auth": auth.token,
+        },
+      }
+    );
+    const ingredients = await ingredientsRes.json();
 
-  return {
-    //@ts-ignore
-    props: { ingredients, id: ctx.params.id, food }, // will be passed to the page component as props
-  };
+    return {
+      //@ts-ignore
+      props: { ingredients, id: params.id, food }, // will be passed to the page component as props
+    };
+  } else {
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/login",
+      },
+      props: {},
+    };
+  }
 };
