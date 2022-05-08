@@ -53,6 +53,10 @@ interface IPostIngredient {
 
 interface IMenus {
   name: string;
-  foods: IFood[];
-  isActive: boolean;
+  Foods: IFood[];
+  isActiveMenu: boolean;
+}
+
+interface IPostFood {
+  foodId: number;
 }

@@ -8,7 +8,7 @@ interface ICheck {
   className?: string;
   name: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  checked: boolean;
+  checked?: boolean;
   disabled?: boolean;
 }
 
